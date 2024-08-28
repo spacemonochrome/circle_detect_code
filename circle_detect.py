@@ -11,14 +11,12 @@ kaydedilmis_cember_value = []
 onay_alan = 0
 onay_oran = 0
 
+odaklanancember = None # nesne_yukseklik, nesne_genislik, angle_rect, nesne_orta_nokta_x, nesne_orta_nokta_y, bnd_x, bnd_y, bnd_w, bnd_h, nesne_box, rect
+
 def kamera_islem(goruntu):
     global roi
     roi = goruntu
     color_g = np.array([25,50,50]), np.array([80,255,255])
-    return main_islem(color_g)
-
-def main_islem(color_g):
-    global roi
     lower_color_HSV, upper_color_HSV = color_g
     hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
     islencek_goruntu = cv2.inRange(hsv, lower_color_HSV, upper_color_HSV)
@@ -31,6 +29,7 @@ def main_islem(color_g):
         if odak is not None:
             x, y = kalibrasyon(odak, cam_orta_nokta_x, cam_orta_nokta_y)
             return roi, x, y
+        
     return roi, None, None
 
 def kalibrasyon(odak, cam_orta_nokta_x, cam_orta_nokta_y):
@@ -44,21 +43,15 @@ def kalibrasyon(odak, cam_orta_nokta_x, cam_orta_nokta_y):
     c = int(resim_yukseklik/2 - resim_yukseklik*0.3 + artanpay / 2)
     d = int(resim_yukseklik/2 - resim_yukseklik*0.3)
     (nesne_yukseklik, nesne_genislik, angle_rect, nesne_orta_nokta_x, nesne_orta_nokta_y, bnd_x, bnd_y, bnd_w, bnd_h, nesne_box, rect) = odak
-    cemberi_ciz(odak,(0,0,255), "")
+    cemberi_ciz(odak,(0,0,255), "") #kilitlenilen cember    
     xuzaklik = nesne_orta_nokta_x - cam_orta_nokta_x
     yuzaklik = cam_orta_nokta_y - nesne_orta_nokta_y
     cv2.putText(roi,"x: " + str(xuzaklik) + " y: " + str(yuzaklik), (cam_orta_nokta_x + 10, cam_orta_nokta_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
-    
+
     onay_alan = bnd_w*bnd_h*4
     onay_oran = int((kisaolan(bnd_w,bnd_h)/uzun_olan(bnd_w,bnd_h))*100)
-    if onay_alan < a*a:
-        cv2.rectangle(roi,(a , b),(c, d),(0,0,0),3)
-    elif onay_alan > a*a and onay_oran > 80:
-        cv2.rectangle(roi,(a , b),(c, d),(0,0,255),3)
-        #duz ileriye gidecek kapali akil ile 85 85 80 80 85 85
+        #duz firlatma kodu calisacak
     
-    if()
-
     return xuzaklik,yuzaklik
 
 def cember_tarama(resim_yukseklik, resim_genislik, contours, hiyerarsi):
@@ -207,7 +200,7 @@ def size_data(ctr):
     nesne_orta_nokta_x, nesne_orta_nokta_y = int(rect[0][0]),int(rect[0][1])
     (bnd_x, bnd_y, bnd_w, bnd_h) = cv2.boundingRect(ctr)
     box = cv2.boxPoints(rect)
-    nesne_box = np.int0(box)
+    nesne_box = np.int8(box)
     return nesne_yukseklik,nesne_genislik,angle_rect,nesne_orta_nokta_x,nesne_orta_nokta_y,bnd_x,bnd_y,bnd_w,bnd_h,nesne_box, rect
 
 def kamera_xy_cizgi(ior):
@@ -287,7 +280,9 @@ def birlestirme_kodu(ta_dizi, contours):
 
 def cemberi_ciz(kritik_degerler,renk,sonuc):
     global roi
+    global odaklanancember
     (nesne_yukseklik, nesne_genislik, angle_rect, nesne_orta_nokta_x, nesne_orta_nokta_y, bnd_x, bnd_y, bnd_w, bnd_h, nesne_box, rect) = kritik_degerler
+    odaklanancember = kritik_degerler
     cv2.ellipse(roi, (nesne_orta_nokta_x,nesne_orta_nokta_y), (nesne_genislik,nesne_yukseklik), 270+angle_rect, 0, 360, renk, 2)
     if sonuc != "":
         cv2.putText(roi, "%"+ str(sonuc) + "e - %"+ str(int(ebob(nesne_yukseklik,nesne_genislik)*100)) + "c", (nesne_orta_nokta_x,nesne_orta_nokta_y), cv2.FONT_HERSHEY_SIMPLEX,0.5, renk, 1, cv2.LINE_AA)
@@ -319,16 +314,16 @@ def dizide_deger_true_falseso(dizi, aranendeger):
 
 def baslangic():
     global prev_frame_time, new_frame_time
-    roi = cv2.imread("a.png")
-    resim_yukseklik, resim_genislik, _ = roi.shape
+    roi = cv2.imread("input.png")
+
     roi, x, y = kamera_islem(roi)  
     roi = kamera_xy_cizgi(roi)  
+
     fps, prev_frame_time, new_frame_time = fps_func(prev_frame_time,new_frame_time)
-
     cv2.putText(roi, fps + " FPS", (15,15), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0,0,255), 1, cv2.LINE_AA)
-
+    
     cv2.imshow('tespit',roi)
-    cv2.imwrite('cikti.png',roi)
+    cv2.imwrite('output.png',roi)
     cv2.waitKey()
 
 if __name__ == '__main__':
