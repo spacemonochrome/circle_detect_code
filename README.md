@@ -7,6 +7,17 @@ Its efficiency is low. It runs at a speed of 30 frames per second on the compute
 
 [SUTIS -proceeding-book-29-33.pdf](https://github.com/spacemonochrome/circle_detect_code/files/14733551/SUTIS.-proceeding-book-29-33.pdf)
 
+Kütüphane kurulumu - installing library
+NumPy kurulumu
+```bash
+pip install numpy
+```
+
+OpenCV Kurulumu
+```bash
+pip install opencv-python
+```
+
 Girdi Görüntüsü - Input
 ![image](https://github.com/spacemonochrome/circle_detect_code/assets/52783312/d92b5642-72ed-487b-bdff-ddd41122de90)
 
